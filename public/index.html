@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Online Clipboard</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 0 auto; padding: 16px; }
+    h1 { font-size: 1.3rem; }
+    input, textarea, button { font: inherit; padding: 10px; box-sizing: border-box; }
+    input, textarea { width: 100%; }
+    textarea { height: 40vh; margin: 8px 0; }
+    .row { display: flex; gap: 8px; }
+    .row button { flex: 1; }
+    #status { min-height: 1.4em; margin-top: 8px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Online Clipboard</h1>
+  <input id="name" placeholder="Clipboard name (e.g. mynotes)" autocapitalize="off" autocomplete="off" spellcheck="false">
+  <textarea id="text" placeholder="Paste text here"></textarea>
+  <div class="row">
+    <button id="save">Save</button>
+    <button id="load">Load</button>
+    <button id="copy">Copy</button>
+  </div>
+  <div id="status"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const nameEl = $('name'), textEl = $('text'), statusEl = $('status');
+
+    nameEl.value = localStorage.getItem('clipName') || '';
+
+    const setStatus = (msg) => (statusEl.textContent = msg);
+    const url = () => `/api/clips/${encodeURIComponent(nameEl.value.trim())}`;
+
+    function requireName() {
+      if (nameEl.value.trim()) return true;
+      setStatus('Enter a name first.');
+      return false;
+    }
+
+    async function call(method, body) {
+      const res = await fetch(url(), {
+        method,
+        headers: body ? { 'Content-Type': 'application/json' } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      return data;
+    }
+
+    const expiryNote = (d) => `Expires ${new Date(d.expiresAt).toLocaleString()}.`;
+
+    $('save').onclick = async () => {
+      if (!requireName()) return;
+      try {
+        const d = await call('PUT', { text: textEl.value });
+        localStorage.setItem('clipName', nameEl.value.trim());
+        setStatus(`Saved. ${expiryNote(d)}`);
+      } catch (e) { setStatus(e.message); }
+    };
+
+    $('load').onclick = async () => {
+      if (!requireName()) return;
+      try {
+        const d = await call('GET');
+        textEl.value = d.text;
+        localStorage.setItem('clipName', nameEl.value.trim());
+        setStatus(`Loaded. ${expiryNote(d)}`);
+      } catch (e) { setStatus(e.message); }
+    };
+
+    $('copy').onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(textEl.value);
+        setStatus('Copied to your device clipboard.');
+      } catch {
+        textEl.select();
+        setStatus('Select and copy manually (browser blocked auto-copy).');
+      }
+    };
+  </script>
+</body>
+</html>
