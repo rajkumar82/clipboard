@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Online Clipboard</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
     :root {
       color-scheme: light dark;
@@ -60,7 +62,7 @@
       box-shadow: var(--shadow);
     }
     h1 { margin: 0 0 18px; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    h1 .em { font-size: 1.4rem; }
+    h1 .em { width: 32px; height: 32px; border-radius: 9px; }
     .field { display: block; margin-bottom: 14px; }
     .field > span { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
     input, textarea, button { font: inherit; color: inherit; }
@@ -69,6 +71,7 @@
       border-radius: 14px; border: 1px solid var(--line); background: var(--bg);
       font-size: 16px; outline: none;
     }
+    input, textarea { display: block; }
     input { height: 48px; }
     textarea { height: 40vh; padding: 12px 14px; resize: vertical; }
     input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.25); }
@@ -89,7 +92,7 @@
 <body>
   <div id="app">
     <div class="card">
-      <h1><span class="em">📋</span> Online Clipboard</h1>
+      <h1><img class="em" src="/icon-192.png" alt=""> Online Clipboard</h1>
       <label class="field">
         <span>Clipboard name</span>
         <input id="name" placeholder="e.g. mynotes" autocapitalize="off" autocomplete="off" spellcheck="false">
